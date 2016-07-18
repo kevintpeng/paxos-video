@@ -10,10 +10,10 @@ function handleConnect(conn) {
   });
 }
 
-function connectToPeer(peer, myId, id) {
-  var conn = peer.connect(id);
+function connectToPeer(id) {
+  var conn = window.peer.connect(id);
   conn.on('open', function(){
-    conn.send('hi ' + id + '. My id is ' + myId);
+    conn.send('hi ' + id + '. My id is ' + window.id);
   });
 }
 
@@ -24,6 +24,11 @@ function generateId() {
   }); 
 }
 
-var id = generateId();
-var peer = connect(id);
-peer.on('connection', handleConnect);
+function sendData() {
+  var id = document.getElementById('peerJSInput').value;
+  connectToPeer(id);
+}
+
+window.id = generateId();
+window.peer = connect(window.id);
+window.peer.on('connection', handleConnect);
