@@ -889,10 +889,16 @@ Peer.prototype._handleMessage = function(message) {
       this._abort('invalid-key', 'API KEY "' + this.options.key + '" is invalid');
       break;
 
-    //
-    case 'LEAVE': // Another peer has closed its connection to this peer.
+    case 'LEAVE': // Another peer has closed its connection to this room.
       util.log('Received leave message from', peer);
+      this.emit('leave', peer);
       this._cleanupPeer(peer);
+      break;
+
+    case 'JOIN': // Another peer has opened its connection to this room.
+      util.log('Received join message from', peer);
+      this.emit('join', peer);
+      this._addConnection(peer, connection);
       break;
 
     case 'EXPIRE': // The offer sent to a peer has expired without response.
@@ -944,7 +950,7 @@ Peer.prototype._handleMessage = function(message) {
     case 'CHAT':
       this.emit('chat', peer, payload);
       break;
-    
+
     default:
       if (!payload) {
         util.warn('You received a malformed message from ' + peer + ' of type ' + type);
@@ -1111,7 +1117,9 @@ Peer.prototype._cleanup = function() {
 Peer.prototype._cleanupPeer = function(peer) {
   var connections = this.connections[peer];
   for (var j = 0, jj = connections.length; j < jj; j += 1) {
-    connections[j].close();
+    if (connections[j]) {
+      connections[j].close();
+    }
   }
 };
 
@@ -1282,7 +1290,7 @@ util.inherits(Socket, EventEmitter);
 Socket.prototype.start = function(id, token, room) {
   this.id = id;
   this.room = room;
-  
+
   this._httpUrl += '/' + id + '/' + token;
   this._wsUrl += '&id=' + id + '&token=' + token + '&room=' + room;
 
@@ -2928,7 +2936,7 @@ var BinaryPack = require('js-binarypack');
 
 var util = {
   debug: false,
-  
+
   inherits: function(ctor, superCtor) {
     ctor.super_ = superCtor;
     ctor.prototype = Object.create(superCtor.prototype, {
@@ -2950,7 +2958,7 @@ var util = {
   },
   pack: BinaryPack.pack,
   unpack: BinaryPack.unpack,
-  
+
   log: function () {
     if (util.debug) {
       var copy = [];
@@ -2972,7 +2980,7 @@ var util = {
     function setZeroTimeoutPostMessage(fn) {
       timeouts.push(fn);
       global.postMessage(messageName, '*');
-    }   
+    }
 
     function handleMessage(event) {
       if (event.source == global && event.data == messageName) {
@@ -2991,7 +2999,7 @@ var util = {
     }
     return setZeroTimeoutPostMessage;
   }(this)),
-  
+
   blobToArrayBuffer: function(blob, cb){
     var fr = new FileReader();
     fr.onload = function(evt) {
