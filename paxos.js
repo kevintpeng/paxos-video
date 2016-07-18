@@ -1,19 +1,26 @@
 function connect(id) {
-  var peer = new Peer(id, {host: 'paxos-video-webrtc.herokuapp.com', port: 80});
+  var peer = new Peer(id, {host: 'paxos-video-webrtc.herokuapp.com', port: 443, secure: true, debug: 3});
   peer.on('open', function(id) { console.log('My peer ID is: ' + id) });
   return peer;
 }
 
 function handleConnect(conn) {
   conn.on('data', function(data){
-    console.log(data);
+    var id = document.getElementById('peerID').value;
+    var node = document.createTextNode(id + ': ' + data); 
+    document.getElementById('output').appendChild(node);
   });
 }
 
-function connectToPeer(id) {
+function connectToPeer(data) {
+  var id = document.getElementById('peerID').value;
+
   var conn = window.peer.connect(id);
   conn.on('open', function(){
-    conn.send('hi ' + id + '. My id is ' + window.id);
+    conn.send(window.id + ': ' + data);
+
+    var node = document.createTextNode(window.id + ': ' + data); 
+    document.getElementById('output').appendChild(node);
   });
 }
 
@@ -25,8 +32,8 @@ function generateId() {
 }
 
 function sendData() {
-  var id = document.getElementById('peerJSInput').value;
-  connectToPeer(id);
+  var data = document.getElementById('peerJSInput').value;
+  connectToPeer(data);
 }
 
 window.id = generateId();
