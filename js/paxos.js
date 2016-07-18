@@ -7,30 +7,39 @@ function connect(id) {
   });
 }
 
-function handleConnect(conn) {
+function handlePeerConnection(conn) {
   conn.on('data', function(data){
     console.log('Receiving data from ' + conn.label);
     appendText(conn.label, data);
   });
 }
 
-function connectToPeers(data, peers) {
+function sendDataToPeers(data, peers) {
   for (var peerIdx in peers) {
     var id = peers[peerIdx];
     if(id == window.id) {
       continue
     }
 
+    // Broker connections
     console.log('Sending data to ' + id);
-    window.conn = window.peer.connect(id);
-    window.conn.label = window.id;
+    window.conn[id] = window.peer.connect(id);
+    window.conn[id].label = window.id;
 
-    window.conn.on('open', function(){
-      window.conn.send(data);
-      appendText(window.id, data);
+    // Send data
+    window.conn[id].on('open', function(){
+      this.send(data);
       document.getElementById('peerJSInput').value = '';
-    }); 
+    });
   }
+}
+
+function sendData() {
+  var data = document.getElementById('peerJSInput').value;
+  window.peer.listRoomMemberPeers(window.room, function(peers){
+    sendDataToPeers(data, peers);
+    appendText(window.id, data);
+  });
 }
 
 function generateId() {
@@ -46,15 +55,13 @@ function appendText(id, text) {
   document.getElementById('output').appendChild(node);
 }
 
-function sendData() {
-  var data = document.getElementById('peerJSInput').value;
-  window.peer.listRoomMemberPeers(window.room, function(peers){
-    connectToPeers(data, peers);
-  });
-}
+window.conn = {}
 
-window.id = generateId();
 window.room = prompt('What is the room?')
 document.getElementById('room').innerHTML = window.room;
+
+window.id = generateId();
+document.getElementById('id').innerHTML = window.id;
+
 window.peer = connect(window.id);
-window.peer.on('connection', handleConnect);
+window.peer.on('connection', handlePeerConnection);
