@@ -8,6 +8,7 @@
   <meta name="description" content="Paxos Video">
   <meta name="author" content="Paxos Video">
 
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
   <script src="js/peer.js"></script>
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -15,12 +16,20 @@
 </head>
 
 <body>
-  <h1 id="room"></h1>
-  <h4 id="id"></h4>
+  <div class="container">
+    <div class="page-header">
+      <h1 id="room">Room <small id="id">Your ID</small></h1>
+    </div>
 
-  <div id="output" style="border: 1px solid black; width: 500px; height: 500px; overflow-y: scroll;"></div>
-  <input type="text" id="peerJSInput"/>
-  <input type="button" id="peerJSSend" value="Send" onclick="sendData()"/>
+    <div id="output" class="panel panel-default" style="width: 100%; height: 500px; overflow-y: scroll;"></div>
+
+    <div class="input-group">
+      <input type="text" class="form-control" id="peerJSInput" placeholder="Type a message..."/>
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="submit" id="peerJSSend" onclick="sendData()">Send Message</button>
+      </span>
+    </div>
+  </div>
   <script src="js/paxos.js"></script>
 </body>
 </html>

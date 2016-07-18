@@ -58,10 +58,8 @@ function appendText(id, text) {
 window.conn = {}
 
 window.room = prompt('What is the room?')
-document.getElementById('room').innerHTML = window.room;
-
 window.id = generateId();
-document.getElementById('id').innerHTML = window.id;
+document.getElementById('room').innerHTML = window.room + "&nbsp; <small>" + window.id + "</small>";
 
 window.peer = connect(window.id);
 window.peer.on('connection', handlePeerConnection);
