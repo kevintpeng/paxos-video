@@ -1,31 +1,36 @@
 function connect(id) {
-  var peer = new Peer(id, {
+  return new Peer(id, {
     host: 'paxos-video-webrtc.herokuapp.com',
     port: 443,
     secure: true,
-    debug: 3
+    room: window.room
   });
-  peer.on('open', function(id) { console.log('My peer ID is: ' + id) });
-  return peer;
 }
 
 function handleConnect(conn) {
   conn.on('data', function(data){
+    console.log('Receiving data from ' + conn.label);
     appendText(conn.label, data);
   });
 }
 
-function connectToPeer(data) {
-  var id = document.getElementById('peerID').value;
+function connectToPeers(data, peers) {
+  for (var peerIdx in peers) {
+    var id = peers[peerIdx];
+    if(id == window.id) {
+      continue
+    }
 
-  window.conn = window.peer.connect(id);
-  window.conn.label = window.id;
+    console.log('Sending data to ' + id);
+    window.conn = window.peer.connect(id);
+    window.conn.label = window.id;
 
-  window.conn.on('open', function(){
-    window.conn.send(data);
-    appendText(window.id, data);
-    document.getElementById('peerJSInput').value = '';
-  });
+    window.conn.on('open', function(){
+      window.conn.send(data);
+      appendText(window.id, data);
+      document.getElementById('peerJSInput').value = '';
+    }); 
+  }
 }
 
 function generateId() {
@@ -43,9 +48,13 @@ function appendText(id, text) {
 
 function sendData() {
   var data = document.getElementById('peerJSInput').value;
-  connectToPeer(data);
+  window.peer.listRoomMemberPeers(window.room, function(peers){
+    connectToPeers(data, peers);
+  });
 }
 
 window.id = generateId();
+window.room = prompt('What is the room?')
+document.getElementById('room').innerHTML = window.room;
 window.peer = connect(window.id);
 window.peer.on('connection', handleConnect);

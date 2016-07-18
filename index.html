@@ -8,17 +8,17 @@
   <meta name="description" content="Paxos Video">
   <meta name="author" content="Paxos Video">
 
-  <script src="http://cdn.peerjs.com/0.3/peer.min.js"></script>
+  <script src="js/peer.js"></script>
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
 </head>
 
 <body>
-  <label for="peerID">Peer ID</label><input type="text" name="peerID" id="peerID"/>
+  <h1 id="room"></h1>
   <div id="output" style="border: 1px solid black; width: 500px; height: 500px; overflow-y: scroll;"></div>
   <input type="text" id="peerJSInput"/>
   <input type="button" id="peerJSSend" value="Send" onclick="sendData()"/>
-  <script src="paxos.js"></script>
+  <script src="js/paxos.js"></script>
 </body>
 </html>
