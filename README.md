@@ -56,3 +56,10 @@ The Proposer sends an Accept Request message to a Quorum of Acceptors with the c
 
 ### Phase 2b: Accepted
 If an Acceptor receives an Accept Request message for a proposal N, it must accept it if and only if it has not already promised to any prepare proposals having an identifier greater than N. In this case, it should register the corresponding value v and send an Accepted message to the Proposer and every Learner. Else, it can ignore the Accept Request.
+
+# Web Real-Time Communication (WebRTC)
+An API definition from W3C, supports browser-to-browser applications for voice and video calling, P2P file sharing without plugins
+- `getUserMedia` allows a web browser to access the camera and microphone to capture media
+- `RTCPeerConnection` sets up audio/video calls
+- `RTCDataChannel` allows browsers to share data via peer-to-peer
+- `getStats` allows the web app to retrieve stats about WebRTC sessions
