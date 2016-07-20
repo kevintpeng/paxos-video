@@ -51,7 +51,7 @@ class Comms {
       var conn = this.connectionToPeer(id)
 
       conn.on('open', function(){
-        self.send(data);
+        this.send(data);
         document.getElementById('peerJSInput').value = '';
       });
     }
