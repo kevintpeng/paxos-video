@@ -1,7 +1,7 @@
 function sendDataFromDOM() {
-  var data = document.getElementById('peerJSInput').value;
-  window.comms.sendDataToPeers(data);
-  window.comms.appendText(this.id, data);
+  var state = document.getElementById('peerJSInput').value;
+  paxos.state = state;
+  paxos.sendProposal();
 }
 
 function generateId() {
@@ -11,13 +11,25 @@ function generateId() {
   });
 }
 
-room = prompt('What is the room?')
-id = generateId();
+function appendText(id, text) {
+  var node = document.createElement("p");
+  node.innerHTML = '<b>' + id + ':</b> ' + text
+  document.getElementById('output').appendChild(node);
+}
 
-document.getElementById('room').innerHTML = room + "&nbsp; <small>" + id + "</small>";
+room = 'room'; // prompt('What is the room?')
+window.id = generateId();
+document.getElementById('room').innerHTML = room + "&nbsp; <small>" + window.id + "</small>";
 
 var comms = new Comms({
-  id: id,
+  id: window.id,
   room: room
 })
+
+var paxos = new Paxos({
+  id: window.id,
+  comms: comms
+})
+
 window.comms = comms;
+window.paxos = paxos;

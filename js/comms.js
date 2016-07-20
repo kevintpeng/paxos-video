@@ -27,44 +27,38 @@ class Comms {
       self.peers = peers;
     });
 
-    this.peer.on('connection', this.handleIncomingData);
     this.peer.on('join', this.handlePeerConnection);
     this.peer.on('leave', this.handlePeerDisconnection);
   }
 
   connectionToPeer(id) {
     if (!(id in this.conns)) {
-      this.conns[id] = this.peer.connect(id);
-      this.conns[id].label = this.id;
+      var conn = this.peer.connect(id, { serialization: 'json', label: this.id });
+      if (!conn) {
+        console.error('conn was undefined');
+      }
+      this.conns[id] = conn;
     }
     return this.conns[id];
   }
 
-  sendDataToPeers(data) {
-    for (var peerIdx in this.peers) {
-      var id = this.peers[peerIdx];
-      if(id == this.id) {
-        continue
-      }
-
-      console.log('Sending data to ' + id);
-      var conn = this.connectionToPeer(id)
-
-      conn.on('open', function(){
-        this.send(data);
-        document.getElementById('peerJSInput').value = '';
-      });
+  sendDataToPeer(peer, type, data) {
+    if (this.peers.indexOf(peer) == -1 || peer == this.id) {
+      return
     }
+
+    data['type'] = type;
+    var stringData = JSON.stringify(data);
+
+    var conn = this.connectionToPeer(id)
+    conn.on('open', function(){
+      this.send(stringData);
+      window.appendText(id, stringData);
+      document.getElementById('peerJSInput').value = '';
+    });
   }
 
   // Handlers
-
-  handleIncomingData(conn) {
-    conn.on('data', function(data){
-      console.log('Receiving data from ' + conn.label);
-      self.appendText(conn.label, data);
-    });
-  }
 
   handlePeerConnection(peer){
     self.peers.push(peer);
@@ -83,13 +77,5 @@ class Comms {
     } else {
       console.log('Could not find ' + peer + ' to disconnect. Peers are now ' + self.peers);
     }
-  }
-
-  // Helpers
-
-  appendText(id, text) {
-    var node = document.createElement("p");
-    node.innerHTML = '<b>' + id + ':</b> ' + text
-    document.getElementById('output').appendChild(node);
   }
 }
