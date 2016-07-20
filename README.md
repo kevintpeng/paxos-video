@@ -1,3 +1,6 @@
+# Paxos Video
+The goal of this project it to enable synchronous viewing of videos across multiple clients, where the correct state of the video is managed by a Paxos algorithm. Communication is handled client side using WebRTC with PeerJS as the javascript adapter.
+
 # Consensus Problem
 A fundamental problem in distributed computing, which requires agreement among a number of processes for a single data value.
 - consensus protocols must be fault tolerant, to deal with unreliability
