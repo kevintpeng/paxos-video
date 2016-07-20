@@ -898,7 +898,6 @@ Peer.prototype._handleMessage = function(message) {
     case 'JOIN': // Another peer has opened its connection to this room.
       util.log('Received join message from', peer);
       this.emit('join', peer);
-      this._addConnection(peer, connection);
       break;
 
     case 'EXPIRE': // The offer sent to a peer has expired without response.
