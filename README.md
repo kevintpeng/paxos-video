@@ -63,3 +63,8 @@ An API definition from W3C, supports browser-to-browser applications for voice a
 - `RTCPeerConnection` sets up audio/video calls
 - `RTCDataChannel` allows browsers to share data via peer-to-peer
 - `getStats` allows the web app to retrieve stats about WebRTC sessions
+
+# Running Tests
+
+1. Run `npm install` to install dependencies
+2. Run `mocha` from the root directory
