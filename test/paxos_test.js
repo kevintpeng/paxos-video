@@ -27,7 +27,7 @@ describe('Paxos', function() {
   });
 
   describe('#receiveProposal', function() {
-    it('it should accept if greater than current sequence', function() {
+    it('should accept if greater than current sequence', function() {
       paxos.seq = 1;
       paxos.accepted_seq = 1;
       paxos.receiveProposal('id', { seq: 2 });
@@ -40,7 +40,7 @@ describe('Paxos', function() {
       assert.equal(2, paxos.accepted_seq);
     });
 
-    it('it should reject if less than than current sequence', function() {
+    it('should reject if less than than current sequence', function() {
       paxos.seq = 2;
       paxos.accepted_seq = 2;
       paxos.receiveProposal('id', { seq: 1 });
@@ -53,7 +53,7 @@ describe('Paxos', function() {
       assert.equal(2, paxos.accepted_seq);
     });
 
-    it('it should reject if equal than current sequence', function() {
+    it('should reject if equal than current sequence', function() {
       paxos.seq = 2;
       paxos.accepted_seq = 2;
       paxos.receiveProposal('id', { seq: 2 });
@@ -68,7 +68,7 @@ describe('Paxos', function() {
   });
 
   describe('#receiveCommit', function() {
-    it('it should accept if > than current sequence and >= to the accepted_seq', function() {
+    it('should accept if > than current sequence and >= to the accepted_seq', function() {
       paxos.seq = 1;
       paxos.accepted_seq = 1;
       paxos.receiveCommit('id', { seq: 2, state: 'state' });
@@ -77,7 +77,7 @@ describe('Paxos', function() {
       assert.equal(2, paxos.seq);
     });
 
-    it('it should reject if <= than current sequence', function() {
+    it('should reject if <= than current sequence', function() {
       paxos.seq = 1;
       paxos.accepted_seq = 1;
       paxos.receiveCommit('id', { seq: 1, state: 'state' });
@@ -86,7 +86,7 @@ describe('Paxos', function() {
       assert.equal(1, paxos.seq);
     });
 
-    it('it should reject if < than accepted_seq', function() {
+    it('should reject if < than accepted_seq', function() {
       paxos.seq = 1;
       paxos.accepted_seq = 2;
       paxos.receiveCommit('id', { seq: 1, state: 'state' });
