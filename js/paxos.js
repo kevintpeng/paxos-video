@@ -1,4 +1,5 @@
 "use strict";
+const TIMEOUT = 3000;
 
 class Paxos {
   constructor(options) {
@@ -14,6 +15,10 @@ class Paxos {
   }
 
   sendProposal() {
+    if (current_time - this.current_proposal.start_time > TIMEOUT) {
+      this.current_proposal = null;
+    }
+
     if (!this.state || this.current_proposal){
       return
     }
@@ -70,8 +75,7 @@ class Paxos {
   }
 
   receiveResponse(id, response) {
-    if (!this.current_proposal || current_time > this.current_proposal.start_time + 3000) {
-      // end current proposal
+    if (!this.current_proposal || current_time - this.current_proposal.start_time > TIMEOUT) {
       this.current_proposal = null;
       return
     }
