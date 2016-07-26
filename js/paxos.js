@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 const TIMEOUT = 3000;
 
 class Paxos {
@@ -8,7 +8,7 @@ class Paxos {
     this.state = null;
     this.seq = null;
     this.current_proposal = null;
-    this.accepted_seq = null
+    this.accepted_seq = null;
 
     // Listen for events from peers
     this.comms.peer.on('connection', this.receiveEvent);
@@ -20,7 +20,7 @@ class Paxos {
     }
 
     if (!this.state || this.current_proposal){
-      return
+      return;
     }
 
     this.current_proposal = {
@@ -29,17 +29,17 @@ class Paxos {
       promise: [],
       reject: [],
       response_tuples: [{ state: this.state, seq: this.seq }]
-    }
+    };
 
     this.seq = {
-      time: this.current_proposal["start_time"],
+      time: this.current_proposal['start_time'],
       id: this.id
-    } // tuple, for absolute uniqueness
+    }; // tuple, for absolute uniqueness
 
     var peers = this.comms.peers;
     for(var peerIdx in peers) {
       var peer = peers[peerIdx];
-      this.comms.sendDataToPeer(peer, 'PROPOSE', { state: this.state, seq: this.seq })
+      this.comms.sendDataToPeer(peer, 'PROPOSE', { state: this.state, seq: this.seq });
     }
   }
 
@@ -50,13 +50,13 @@ class Paxos {
 
       switch (event.type) {
       case 'PROPOSE':
-        receiveProposal(id, event.data);
+        this.receiveProposal(id, event.data);
         break;
       case 'RESPONSE':
-        receiveResponse(id, event.data);
+        this.receiveResponse(id, event.data);
         break;
       case 'COMMIT':
-        receiveCommit(id, event.data);
+        this.receiveCommit(id, event.data);
         break;
       default:
         console.error('Received an unknown event (' + event.type + ') from peer ' + id);
@@ -67,17 +67,18 @@ class Paxos {
 
   receiveProposal(id, proposal) {
     if (proposal.seq > this.seq) {
-      this.comms.sendDataToPeer(id, 'RESPONSE', { accept: true, state: this.state, seq: proposal.seq }) // undefined state & seq if it hasn't accepted anything yet
-      this.accepted_seq = proposal.seq
+      this.comms.sendDataToPeer(id, 'RESPONSE', { accept: true, state: this.state, seq: proposal.seq }); // undefined state & seq if it hasn't accepted anything yet
+      this.accepted_seq = proposal.seq;
     } else {
-      this.comms.sendDataToPeer(id, 'RESPONSE', { accept: false, state: this.state, seq: this.seq }) // this is important because this is how newest states are communicated to old proposals
+      this.comms.sendDataToPeer(id, 'RESPONSE', { accept: false, state: this.state, seq: this.seq }); // this is important because this is how newest states are communicated to old proposals
     }
   }
 
   receiveResponse(id, response) {
-    if (!this.current_proposal || current_time - this.current_proposal.start_time > TIMEOUT) {
+    if (!this.current_proposal || (new Date).getTime() - this.current_proposal.start_time > TIMEOUT) {
+      // end current proposal
       this.current_proposal = null;
-      return
+      return;
     }
 
     if (response.accept) {

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+DEBUG=eslint:cli-engine eslint --color js/*.js test/*.js test/**/*.js

@@ -1,5 +1,6 @@
-class Comms {
+'use strict';
 
+class Comms {
   constructor(options) {
     self = this;
 
@@ -42,9 +43,9 @@ class Comms {
   }
 
   sendDataToPeer(id, type, data) {
-    var conn = this.connectionToPeer(id)
+    var conn = this.connectionToPeer(id);
     conn.on('open', function(){
-      this.peer.sendToAll(type, data)
+      this.peer.sendToAll(type, data);
       window.appendText(id, JSON.stringify(data));
       document.getElementById('peerJSInput').value = '';
     });
@@ -59,7 +60,7 @@ class Comms {
 
   handlePeerDisconnection(peer){
     if (self.peers === 'undefined') {
-      return
+      return;
     }
 
     var index = self.peers.indexOf(peer);
@@ -71,3 +72,5 @@ class Comms {
     }
   }
 }
+
+module.exports = Comms;

@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
 let assert     = require('chai').assert,
-    expect     = require('chai').expect,
-      path     = require('path'),
-     Paxos     = require(path.join(__dirname, '..', 'js', 'paxos')),
-     CommsMock = require(path.join(__dirname, 'mocks', 'comms_mock'));
+  expect     = require('chai').expect,
+  path     = require('path'),
+  Paxos     = require(path.join(__dirname, '..', 'js', 'paxos')),
+  CommsMock = require(path.join(__dirname, 'mocks', 'comms_mock'));
 
 describe('Paxos', function() {
   let paxos, comms;
@@ -19,9 +19,9 @@ describe('Paxos', function() {
       assert.equal('id', paxos.id);
       assert.equal(comms, paxos.comms);
       expect(paxos.state).to.be.null;
-      expect(paxos.seq).to.be.null
-      expect(paxos.current_proposal).to.be.null
-      expect(paxos.accepted_seq).to.be.null
+      expect(paxos.seq).to.be.null;
+      expect(paxos.current_proposal).to.be.null;
+      expect(paxos.accepted_seq).to.be.null;
       assert.equal(paxos.receiveEvent, paxos.comms.peer.ons['connection']);
     });
   });

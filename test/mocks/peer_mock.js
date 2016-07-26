@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 class PeerMock {
   constructor(id, options) {
@@ -7,7 +7,7 @@ class PeerMock {
     this.peers = [];
 
     this.ons = {};
-    this.sendToAlls = {}
+    this.sendToAlls = {};
   }
 
   listRoomMemberPeers(room, cb) {
