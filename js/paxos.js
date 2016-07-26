@@ -15,7 +15,7 @@ class Paxos {
   }
 
   sendProposal() {
-    if (current_time - this.current_proposal.start_time > TIMEOUT) {
+    if ((new Date).getTime() - this.current_proposal.start_time > TIMEOUT) {
       this.current_proposal = null;
     }
 
