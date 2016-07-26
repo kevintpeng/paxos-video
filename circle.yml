@@ -1,0 +1,4 @@
+test:
+  override:
+    - npm test
+    - bin/lint
