@@ -12,7 +12,7 @@
     "url": "https://github.com/kevintpeng/paxos-video"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "test": "./node_modules/.bin/mocha"
   },
   "license": "MIT"
 }
