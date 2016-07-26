@@ -21,7 +21,6 @@ class Comms {
       room: this.room
     });
 
-
     // Populate this.peers
     this.peer.listRoomMemberPeers(this.room, function(peers) {
       self.peers = peers;
@@ -42,18 +41,11 @@ class Comms {
     return this.conns[id];
   }
 
-  sendDataToPeer(peer, type, data) {
-    if (this.peers.indexOf(peer) == -1 || peer == this.id) {
-      return
-    }
-
-    data['type'] = type;
-    var stringData = JSON.stringify(data);
-
+  sendDataToPeer(id, type, data) {
     var conn = this.connectionToPeer(id)
     conn.on('open', function(){
-      this.send(stringData);
-      window.appendText(id, stringData);
+      this.peer.sendToAll(type, data)
+      window.appendText(id, JSON.stringify(data));
       document.getElementById('peerJSInput').value = '';
     });
   }

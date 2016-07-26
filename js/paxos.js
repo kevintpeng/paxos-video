@@ -1,3 +1,5 @@
+"use strict";
+
 class Paxos {
   constructor(options) {
     this.id = options.id;
@@ -60,10 +62,10 @@ class Paxos {
 
   receiveProposal(id, proposal) {
     if (proposal.seq > this.seq) {
-      this.comm.sendDataToPeer(id, 'RESPONSE', { accept: true, state: this.state, seq: this.seq }) // undefined state & seq if it hasn't accepted anything yet
+      this.comms.sendDataToPeer(id, 'RESPONSE', { accept: true, state: this.state, seq: proposal.seq }) // undefined state & seq if it hasn't accepted anything yet
       this.accepted_seq = proposal.seq
     } else {
-      this.comm.sendDataToPeer(id, 'RESPONSE', { accept: false, state: this.state, seq: this.seq }) // this is important because this is how newest states are communicated to old proposals
+      this.comms.sendDataToPeer(id, 'RESPONSE', { accept: false, state: this.state, seq: this.seq }) // this is important because this is how newest states are communicated to old proposals
     }
   }
 
@@ -107,3 +109,5 @@ class Paxos {
     }
   }
 }
+
+module.exports = Paxos;
