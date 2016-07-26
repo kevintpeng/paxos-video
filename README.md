@@ -67,5 +67,4 @@ An API definition from W3C, supports browser-to-browser applications for voice a
 # Running Tests
 
 1. Run `npm install` to install dependencies
-2. Run `npm install -g mocha`
-3. Run `mocha` from the root directory
+2. Run `./.node_modules/.bin/mocha` from the root directory
