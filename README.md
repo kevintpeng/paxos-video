@@ -11,12 +11,12 @@ A fundamental problem in distributed computing, which requires agreement among a
 1. A self assigned coordinator contacts every node, propose a value and gather boolean responses
 2. if everyone agrees, commit
 
-Solves consensus problem assuming no failures. 
+Solves consensus problem assuming no failures.
 - If a coordinator crashes without sending all proposal messages, some nodes are blocked waiting for a response to the consensus
 - If coordinator crashes sending half of commits, then some nodes are updated, others are blocked
 
 ### Three-Phase Commit
-Similar to 2PC. Second phase of 2PC has two sub-phases. 
+Similar to 2PC. Second phase of 2PC has two sub-phases.
 1. Coordinator proposes
 2. If everyone agrees, prepare to commit, communicating the result of the vote to every node
 3. commit (or abort if delivery of prepare to commit to any node fails)
@@ -27,7 +27,7 @@ Similar to 2PC. Second phase of 2PC has two sub-phases.
 **Problem**: network partitioning can cause inconsistenet states. In network systems, *fail-stop* isn't the only model of failures. Nodes can follow a *fail-recover* fault model. Coordinator can recover and interfere with another recovery node. Failure in this case isn't crashing, but could be instead network interuptions.
 
 ## Paxos -- [source](http://the-paper-trail.org/blog/consensus-protocols-paxos/)
-- paxos adds **ordering** to the proposals to determine which proposals should be accepted. 
+- paxos adds **ordering** to the proposals to determine which proposals should be accepted.
   - proposals are tagged with **sequence numbers**, used for total order
   - an acceptor guarantees that it will not accept any more proposals ordered before its newest proposal, instead returning its highest sequence number, which the proposer uses to figure out a sufficiently high sequence number for its next proposal
   - proposers draw from disjoint sets of sequence numbers for uniqueness (one practical way is using the address value of the proposer for tie breakers, paired with an integer)
@@ -36,7 +36,7 @@ Similar to 2PC. Second phase of 2PC has two sub-phases.
   - therefore a third majority is guaranteed to contain information about the previous two majorities
   - by having majorities, paxos guarantees that every reply will contain at least one response from the previously agreed proposal
   - before any commit is sent from a proposer, it is known what the most recently agreed proposal was
-  - all acceptors promise not to accept values part of sequences less than its current highest, preventing a proposer with a low sequence number from getting its proposal accepted 
+  - all acceptors promise not to accept values part of sequences less than its current highest, preventing a proposer with a low sequence number from getting its proposal accepted
 
 ### Reading a Value
 A node can query the current accepted value from all other nodes, and the accepted value is the one that the majority hold. Writing a value is more complex, with 2 multi-step phases:
@@ -67,5 +67,4 @@ An API definition from W3C, supports browser-to-browser applications for voice a
 # Running Tests
 
 1. Run `npm install` to install dependencies
-2. Run `npm install -g mocha`
-3. Run `mocha` from the root directory
+2. Run `npm test`
