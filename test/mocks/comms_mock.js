@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
 let path     = require('path'),
-    PeerMock = require(path.join(__dirname, 'peer_mock')); 
+  PeerMock = require(path.join(__dirname, 'peer_mock')); 
 
 class CommsMock {
   constructor(options) {
@@ -38,7 +38,7 @@ class CommsMock {
 
   handlePeerDisconnection(peer){
     if (this.peers === 'undefined') {
-      return
+      return;
     }
 
     var index = this.peers.indexOf(peer);
