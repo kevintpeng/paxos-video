@@ -34,7 +34,7 @@ class Paxos {
     this.seq = {
       time: this.current_proposal['start_time'],
       id: this.id
-    }; // tuple, for absolute uniqueness
+    }; // tuple, for absolute uniqueness, id is the tiebreaker for equal start_times
 
     var peers = this.comms.peers;
     for(var peerIdx in peers) {
@@ -66,7 +66,7 @@ class Paxos {
   }
 
   receiveProposal(id, proposal) {
-    if (proposal.seq > this.seq) {
+    if (Paxos.sequenceGt(proposal.seq, this.seq)) {
       this.comms.sendDataToPeer(id, 'RESPONSE', { accept: true, state: this.state, seq: proposal.seq }); // undefined state & seq if it hasn't accepted anything yet
       this.accepted_seq = proposal.seq;
     } else {
@@ -92,7 +92,7 @@ class Paxos {
     var rejectionCount = this.current_proposal.reject.length;
 
     if (promiseCount / this.current_proposal.total > 0.5) {
-      this._commit()
+      this._sendCommit()
     } else if (promiseCount + rejectionCount == this.current_proposal.total) {
       // We've received all responses, but they did not reach majority, reset proposal
       this.current_proposal = null;
@@ -100,22 +100,42 @@ class Paxos {
   }
 
   receiveCommit(id, proposal) {
-    if (proposal.seq > this.seq && proposal.seq >= this.accepted_seq) {
+    if (Paxos.acceptCommit) {
       this.state = proposal.state;
       this.seq = proposal.seq;
       this.accepted_seq = null;
     }
   }
 
-  _commit() {
-    // TODO: need to write edge case
+  _sendCommit() {
+    // TODO: edge cases
     var times = this.current_proposal.response_tuples.map(function(o){ return o.seq.time; });
-    var highest_sequence = Math.max.apply(Math, times);
+    var highest_sequence = Paxos.maxSequence;
     var peers = this.comms.peers;
     for (var peerIdx in peers) {
       var peer = peers[peerIdx];
       this.comms.sendDataToPeer(peer, 'COMMIT', highest_sequence);
     }
+  }
+
+  static acceptCommit(proposal, current) {
+    return Paxos.sequenceGt(proposal.seq, current.seq.time) &&
+           Paxos.sequenceGt(proposal.seq, current.accepted_seq)
+  }
+
+  static sequenceGt(seq1, seq2) {
+    return (seq1.time > current.seq.time) ||
+           (seq1.time === current.seq.time && seq1.id > current.seq.id)
+  }
+
+  static maxSequence(sequences) {
+    max_seq = {time: 0, id: ''}
+    for (i = 0; i < sequences.length; i++) {
+      if (Paxos.sequenceGt(sequences[i], max_seq)){
+        max_seq = sequences[i]
+      }
+    }
+    return max_seq
   }
 }
 
