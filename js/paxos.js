@@ -124,8 +124,8 @@ class Paxos {
   }
 
   static sequenceGt(seq1, seq2) {
-    return (seq1.time > current.seq.time) ||
-           (seq1.time === current.seq.time && seq1.id > current.seq.id)
+    return (seq1.time > seq2.time) ||
+           (seq1.time === seq2.time && seq1.id > seq2.id)
   }
 
   static maxSequence(sequences) {
