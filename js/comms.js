@@ -2,16 +2,12 @@
 
 class Comms {
   constructor(options) {
-    self = this;
-
     this.id = options.id;
     this.room = options.room;
 
     this.peers = [];
     this.peer = null;
     this.conns = {};
-
-    this.connect();
   }
 
   connect() {
@@ -23,8 +19,9 @@ class Comms {
     });
 
     // Populate this.peers
+    var comms = this;
     this.peer.listRoomMemberPeers(this.room, function(peers) {
-      self.peers = peers;
+      comms.peers = peers;
     });
 
     this.peer.on('join', this.handlePeerConnection);
@@ -44,8 +41,9 @@ class Comms {
 
   sendDataToPeer(id, type, data) {
     var conn = this.connectionToPeer(id);
+    var comms = this;
     conn.on('open', function(){
-      this.peer.sendToAll(type, data);
+      comms.peer.sendToAll(type, data);
       window.appendText(id, JSON.stringify(data));
       document.getElementById('peerJSInput').value = '';
     });
@@ -53,23 +51,29 @@ class Comms {
 
   // Handlers
 
-  handlePeerConnection(peer){
-    self.peers.push(peer);
-    console.log('Connected ' + peer + '. Peers are now ' + self.peers);
+  handlePeerConnection() {
+    var comms = this;
+    return function(peer) {
+      comms.peers.push(peer);
+      console.info('Connected ' + peer + '. Peers are now ' + comms.peers);
+    };
   }
 
-  handlePeerDisconnection(peer){
-    if (self.peers === 'undefined') {
-      return;
-    }
+  handlePeerDisconnection() {
+    var comms = this;
+    return function(peer) {
+      if (typeof comms.peers === 'undefined') {
+        return;
+      }
 
-    var index = self.peers.indexOf(peer);
-    if (index > -1) {
-      self.peers.splice(index, 1);
-      console.log('Disconnected ' + peer + '. Peers are now ' + self.peers);
-    } else {
-      console.log('Could not find ' + peer + ' to disconnect. Peers are now ' + self.peers);
-    }
+      var index = comms.peers.indexOf(peer);
+      if (index > -1) {
+        comms.peers.splice(index, 1);
+        console.info('Disconnected ' + peer + '. Peers are now ' + comms.peers);
+      } else {
+        console.info('Could not find ' + peer + ' to disconnect. Peers are now ' + comms.peers);
+      }
+    };
   }
 }
 

@@ -28,6 +28,8 @@ var comms = new Comms({
   room: room
 });
 
+comms.connect();
+
 var paxos = new Paxos({
   id: window.id,
   comms: comms
