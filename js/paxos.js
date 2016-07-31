@@ -92,14 +92,7 @@ class Paxos {
     var rejectionCount = this.current_proposal.reject.length;
 
     if (promiseCount / this.current_proposal.total > 0.5) {
-      // TODO: need to write edge case
-      var times = this.current_proposal.response_tuples.map(function(o){ return o.seq.time; });
-      var highest_sequence = Math.max.apply(Math, times);
-      var peers = this.comms.peers;
-      for (var peerIdx in peers) {
-        var peer = peers[peerIdx];
-        this.comms.sendDataToPeer(peer, 'COMMIT', highest_sequence);
-      }
+      this._commit()
     } else if (promiseCount + rejectionCount == this.current_proposal.total) {
       // We've received all responses, but they did not reach majority, reset proposal
       this.current_proposal = null;
@@ -111,6 +104,17 @@ class Paxos {
       this.state = proposal.state;
       this.seq = proposal.seq;
       this.accepted_seq = null;
+    }
+  }
+
+  _commit() {
+    // TODO: need to write edge case
+    var times = this.current_proposal.response_tuples.map(function(o){ return o.seq.time; });
+    var highest_sequence = Math.max.apply(Math, times);
+    var peers = this.comms.peers;
+    for (var peerIdx in peers) {
+      var peer = peers[peerIdx];
+      this.comms.sendDataToPeer(peer, 'COMMIT', highest_sequence);
     }
   }
 }
