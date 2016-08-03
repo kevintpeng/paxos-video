@@ -38,10 +38,21 @@ Similar to 2PC. Second phase of 2PC has two sub-phases.
   - before any commit is sent from a proposer, it is known what the most recently agreed proposal was
   - all acceptors promise not to accept values part of sequences less than its current highest, preventing a proposer with a low sequence number from getting its proposal accepted
 
-### Reading a Value
+### Full Spec
+*In our implementation, value is the state of the video.* 
+
+There are 3 classes of agents: proposers, acceptors, learners. A single process may act as more than one agent.
+
+Choosing a value is easy if there is only a single acceptor agent. It is more resiliant if we have multiple though. A value is chosen when enough acceptor agents accept, where large enough is *majority* (>50%, since any two majorities from the same set will always have at least one overlapping agent).
+
+Property 1: An acceptor must *accept* the first proposal it recieves. An acceptor must be able to accept more than one proposal. A proposal must have a unique number, and a value. A proposal is *chosen* when majority accept. Multiple proposals can be chosen if they all propose the same value.
+
+Property 2: If a proposal with value `v` is chosen, then every higher-numbered proposal that is chosen has value `v`.
+
+### Reading a Value -- [source](https://en.wikipedia.org/wiki/Paxos_(computer_science)#Basic_Paxos)
 A node can query the current accepted value from all other nodes, and the accepted value is the one that the majority hold. Writing a value is more complex, with 2 multi-step phases:
 
-### Phase 1a: Prepare -- [source](https://en.wikipedia.org/wiki/Paxos_(computer_science)#Basic_Paxos)
+### Phase 1a: Prepare
 A Proposer (the leader) creates a proposal identified with a number N. This number must be greater than any previous proposal number used by this Proposer. Then, it sends a Prepare message containing this proposal to a Quorum of Acceptors. The Proposer decides who is in the Quorum.
 
 ### Phase 1b: Promise
