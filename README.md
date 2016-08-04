@@ -39,7 +39,9 @@ Similar to 2PC. Second phase of 2PC has two sub-phases.
   - all acceptors promise not to accept values part of sequences less than its current highest, preventing a proposer with a low sequence number from getting its proposal accepted
 
 ### Full Spec
-*In our implementation, value is the state of the video.* 
+Paxos has self defined rounds of proposals, where the right proposal is more likely to be the first proposal submitted. If two proposals X(1, X) and (2, Y) are submitted to acceptors A, B, C there are two possible outcomes:
+1. A = (1, X), B = (2, Y), C = (2, Y). B and C now ignore (1, X) and A is overwritten. Consensus reaches (2, Y)
+2. A = (1, X), A = (2, Y), B = (2, Y). A is accepts Y, but propogates X's value to Y. Consensus reaches (2, X)
 
 There are 3 classes of agents: proposers, acceptors, learners. A single process may act as more than one agent.
 
