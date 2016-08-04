@@ -5,76 +5,38 @@ class Comms {
     this.id = options.id;
     this.room = options.room;
 
+    this.rtc = null;
+    this.handleReceiveData = function(evt){ };
     this.peers = [];
-    this.peer = null;
-    this.conns = {};
   }
 
   connect() {
-    this.peer = new Peer(this.id, {
-      host: 'paxos-video-webrtc.herokuapp.com',
-      port: 443,
-      secure: true,
-      room: this.room
-    });
-
-    // Populate this.peers
-    var comms = this;
-    this.peer.listRoomMemberPeers(this.room, function(peers) {
-      comms.peers = peers;
-    });
-
-    this.peer.on('join', this.handlePeerConnection);
-    this.peer.on('leave', this.handlePeerDisconnection);
+    this.rtc = new SimpleWebRTC({ media: {} });
+    this.rtc.on('readyToCall', this.init());
   }
 
-  connectionToPeer(id) {
-    if (!(id in this.conns)) {
-      var conn = this.peer.connect(id, { serialization: 'json', label: this.id });
-      if (!conn) {
-        console.error('conn was undefined');
-      }
-      this.conns[id] = conn;
-    }
-    return this.conns[id];
-  }
-
-  sendDataToPeer(id, type, data) {
-    var conn = this.connectionToPeer(id);
+  init() {
     var comms = this;
-    conn.on('open', function(){
-      comms.peer.sendToAll(type, data);
-      window.appendText(id, JSON.stringify(data));
-      document.getElementById('peerJSInput').value = '';
-    });
-  }
-
-  // Handlers
-
-  handlePeerConnection() {
-    var comms = this;
-    return function(peer) {
-      comms.peers.push(peer);
-      console.info('Connected ' + peer + '. Peers are now ' + comms.peers);
+    return function() {
+      comms.rtc.on('data', comms.handleReceiveData);
+      comms.rtc.joinRoom(comms.room);
     };
   }
 
-  handlePeerDisconnection() {
-    var comms = this;
-    return function(peer) {
-      if (typeof comms.peers === 'undefined') {
-        return;
-      }
+  setHandleReceivedData(fnc) {
+    this.handleReceiveData = fnc;
+    this.rtc.on('data', this.handleReceiveData);
+  }
 
-      var index = comms.peers.indexOf(peer);
-      if (index > -1) {
-        comms.peers.splice(index, 1);
-        console.info('Disconnected ' + peer + '. Peers are now ' + comms.peers);
-      } else {
-        console.info('Could not find ' + peer + ' to disconnect. Peers are now ' + comms.peers);
-      }
+  sendDataToChannel(id, type, data) {
+    var message = {
+      'id': id,
+      'type': type,
+      'data': data
     };
+
+    this.rtc.sendToAll('data', message);
   }
 }
 
-module.exports = Comms;
+// module.exports = Comms;

@@ -11,7 +11,7 @@ class Paxos {
     this.accepted_seq = null;
 
     // Listen for events from peers
-    this.comms.peer.on('connection', this.receiveEvent);
+    this.comms.handleReceiveData = this.receiveEvent;
   }
 
   sendProposal() {
@@ -36,33 +36,28 @@ class Paxos {
       id: this.id
     }; // tuple, for absolute uniqueness
 
-    var peers = this.comms.peers;
-    for(var peerIdx in peers) {
-      var peer = peers[peerIdx];
-      this.comms.sendDataToPeer(peer, 'PROPOSE', { state: this.state, seq: this.seq });
-    }
+    this.comms.sendDataToChannel('PROPOSE', { state: this.state, seq: this.seq });
   }
 
-  receiveEvent(connection) {
-    connection.on('data', function(event){
-      var id = connection.label;
-      console.log('Receiving event from ' + id);
+  receiveEvent(event) {
+    var id = event.data['id'];
+    var data = event.data;
+    console.log('Receiving event from ' + id);
 
-      switch (event.type) {
-      case 'PROPOSE':
-        this.receiveProposal(id, event.data);
-        break;
-      case 'RESPONSE':
-        this.receiveResponse(id, event.data);
-        break;
-      case 'COMMIT':
-        this.receiveCommit(id, event.data);
-        break;
-      default:
-        console.error('Received an unknown event (' + event.type + ') from peer ' + id);
-        break;
-      }
-    });
+    switch (data['type']) {
+    case 'PROPOSE':
+      this.receiveProposal(id, data['data']);
+      break;
+    case 'RESPONSE':
+      this.receiveResponse(id, data['data']);
+      break;
+    case 'COMMIT':
+      this.receiveCommit(id, data['data']);
+      break;
+    default:
+      console.error('Received an unknown event (' + data['type'] + ') from peer ' + id);
+      break;
+    }
   }
 
   receiveProposal(id, proposal) {
@@ -111,12 +106,8 @@ class Paxos {
     // TODO: need to write edge case
     var times = this.current_proposal.response_tuples.map(function(o){ return o.seq.time; });
     var highest_sequence = Math.max.apply(Math, times);
-    var peers = this.comms.peers;
-    for (var peerIdx in peers) {
-      var peer = peers[peerIdx];
-      this.comms.sendDataToPeer(peer, 'COMMIT', highest_sequence);
-    }
+    this.comms.sendDataToChannel('COMMIT', highest_sequence);
   }
 }
 
-module.exports = Paxos;
+// module.exports = Paxos;
