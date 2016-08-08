@@ -37,6 +37,18 @@ class Comms {
 
     this.rtc.sendToAll('data', message);
   }
+
+  sendDataToPeer(peerId, id, type, data) {
+    var message = {
+      'id': id,
+      'type': type,
+      'data': data
+    };
+
+    this.rtc.sendToPeer(peerId, 'data', message);
+  }
 }
 
-// module.exports = Comms;
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+  module.exports = Comms;
+}
