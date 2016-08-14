@@ -9,16 +9,21 @@ class Paxos {
     this.id = options.id;
     //this.comms = options.comms;
     this.correct_val = null;
-    this.promised_val = null; // {seq => {default: {}, responses: []} }
-    this.active_proposals = [];
+    this.promised_val = null; 
+    this.active_proposals = []; // {seq => {default: {}, responses: []} }
     this.last_seq = null;
 
     // Listen for events from peers
     this.comms.peer.on('connection', this.receiveEvent);
   }
 
+  getState() {
+    // this implementation will change for video state later
+    return Math.random();
+  }
+
   newProposal() {
-    // state = get state of the current video
+    state = getState()
     seq = {time: (new Date).getTime(), id: this.id}
     return {seq: seq, val: state}
   }
@@ -31,9 +36,9 @@ class Paxos {
   receivePrepare(proposer, proposal) {
     if(Paxos.sequenceGt(proposal.seq, this.last_seq)) {
       sendResponse(proposer, proposal.seq.time, {seq: this.last_seq, val: this.promised_val})
+      this.last_seq = proposal.seq
       if(this.promised_val == null){
         this.promised_val = proposal.val
-        this.last_seq = proposal.seq
       }
     }
   }
