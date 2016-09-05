@@ -8,17 +8,14 @@ function generateId() {
 /*eslint-disable no-unused-vars */
 function sendDataFromDOM() {
   var state = document.getElementById('peerJSInput').value;
-  window.comms.sendDataToChannel("id", "type", state);
-  appendText({ payload: { id: 'id', data: state }})
+  window.comms.sendDataToChannel("type", state);
   // paxos.state = state;
   // paxos.sendProposal();
 }
 
-function appendText(evt) {
-  var id = evt.payload.id;
-  var text = evt.payload.data;
+function appendText(data) {
   var node = document.createElement('p');
-  node.innerHTML = '<b>' + id + ':</b> ' + text;
+  node.innerHTML = '<b>' + data.id + ':</b> ' + data.data;
   document.getElementById('output').appendChild(node);
 }
 /*eslint-enable no-unused-vars */
@@ -32,7 +29,6 @@ var comms = new Comms({
   room: room
 });
 comms.connect();
-comms.handleReceiveData = appendText;
 
 // var paxos = new Paxos({
 //   id: window.id,

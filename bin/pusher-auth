@@ -1,0 +1,4 @@
+pusher-hackathon run --id $PAXOS_PUSHER_ID \
+                     --key $PAXOS_PUSHER_KEY \
+                     --secret $PAXOS_PUSHER_SECRET \
+                     --port 9000

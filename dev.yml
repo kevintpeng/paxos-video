@@ -1,0 +1,13 @@
+name: paxos-video
+
+up:
+  - ruby: 2.3.1
+  - bundler
+
+open:
+  app: http://localhost:8000
+
+commands:
+  lint: bin/lint
+  pusher: bin/pusher-auth
+  server: python -m SimpleHTTPServer 8000

@@ -4,48 +4,56 @@ class Comms {
   constructor(options) {
     this.id = options.id;
     this.room = options.room;
+    this.channel = null;
 
-    this.rtc = null;
-    this.handleReceiveData = function(evt){ };
-    this.peers = [];
+    this.pusher = null;
+    this.members = [];
   }
 
   connect() {
-    this.rtc = new SimpleWebRTC({ media: {} });
-    this.rtc.on('readyToCall', this.init());
+    this.pusher = new Pusher('a067c1d86efea8a389b5', {
+      authEndpoint: "http://localhost:9000/pusher/auth",
+      auth: { params: { user_id: this.id } },
+      wsHost: 'paxos-poxa.herokuapp.com',
+      wsPort: 80,
+      enabledTransports: ["ws", "flash"],
+      disabledTransports: ["flash"],
+      disableStats: true
+    });
+    this.channel = this.pusher.subscribe("presence-" + this.room);
+    this.setupChannelBindings();
+    this.pusher.bind('client-data', function(data) {
+      console.log(data.data);
+      window.appendText(data)
+    });
   }
 
-  init() {
+  setupChannelBindings() {
     var comms = this;
-    return function() {
-      comms.rtc.on('data', comms.handleReceiveData);
-      comms.rtc.joinRoom(comms.room);
-    };
+    this.channel.bind('pusher:subscription_succeeded', function(members) {
+      members.each(function(member) {
+        comms.members.push(member);
+      });
+    })
+    this.channel.bind('pusher:member_added', function(member) {
+      comms.members.push(member);
+    });
+    this.channel.bind('pusher:member_removed', function(member) {
+      comms.members = comms.members.filter(function(comm_member) {
+        return comm_member.id != member.id;
+      });
+    });
   }
 
-  setHandleReceivedData(fnc) {
-    this.handleReceiveData = fnc;
-    this.rtc.on('data', this.handleReceiveData);
-  }
-
-  sendDataToChannel(id, type, data) {
+  sendDataToChannel(type, data) {
     var message = {
-      'id': id,
+      'id': this.id,
       'type': type,
       'data': data
     };
 
-    this.rtc.sendToAll('data', message);
-  }
-
-  sendDataToPeer(peerId, id, type, data) {
-    var message = {
-      'id': id,
-      'type': type,
-      'data': data
-    };
-
-    this.rtc.sendToPeer(peerId, 'data', message);
+    this.channel.trigger('client-data', message);
+    window.appendText(message);
   }
 }
 
