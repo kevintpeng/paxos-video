@@ -1,10 +1,10 @@
 'use strict';
 
 let chai      = require('chai'),
-    assert    = chai.assert,
-    expect    = chai.expect,
-    path      = require('path'),
-    Comms     = require(path.join(__dirname, '..', 'js', 'comms'));
+  assert    = chai.assert,
+  expect    = chai.expect,
+  path      = require('path'),
+  Comms     = require(path.join(__dirname, '..', 'js', 'comms'));
 
 describe('Comms', function() {
   let comms;
@@ -27,7 +27,7 @@ describe('Comms', function() {
     it('should add peer to peers list', function() {
       var handleConnection = comms.handlePeerConnection();
       handleConnection('12345');
-      assert.include(comms.peers, '12345')
+      assert.include(comms.peers, '12345');
     });
   });
 
@@ -53,7 +53,7 @@ describe('Comms', function() {
 
       var handleDisconnection = comms.handlePeerDisconnection();
       handleDisconnection('123456');
-      expect(comms.peers).to.eql(['12345'])
+      expect(comms.peers).to.eql(['12345']);
     });
   });
 });

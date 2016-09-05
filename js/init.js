@@ -8,14 +8,13 @@ function generateId() {
 /*eslint-disable no-unused-vars */
 function sendDataFromDOM() {
   var state = document.getElementById('peerJSInput').value;
-  window.comms.sendDataToChannel("type", state);
-  // paxos.state = state;
-  // paxos.sendProposal();
+  paxos.state = state;
+  paxos.sendProposal();
 }
 
-function appendText(data) {
+function appendText(type, msg) {
   var node = document.createElement('p');
-  node.innerHTML = '<b>' + data.id + ':</b> ' + data.data;
+  node.innerHTML = '<b>' + type + ':</b> ' + msg;
   document.getElementById('output').appendChild(node);
 }
 /*eslint-enable no-unused-vars */
@@ -30,10 +29,10 @@ var comms = new Comms({
 });
 comms.connect();
 
-// var paxos = new Paxos({
-//   id: window.id,
-//   comms: comms
-// });
+var paxos = new Paxos({
+  id: window.id,
+  comms: comms
+});
 
 window.comms = comms;
-// window.paxos = paxos;
+window.paxos = paxos;

@@ -11,11 +11,12 @@ class Paxos {
     this.accepted_seq = null;
 
     // Listen for events from peers
-    this.comms.handleReceiveData = this.receiveEvent;
+    this.comms.setHandleReceivedData(this.receiveEvent());
   }
 
   sendProposal() {
-    if ((new Date).getTime() - this.current_proposal.start_time > TIMEOUT) {
+    if (this.current_proposal != null && 
+        (new Date).getTime() - this.current_proposal.start_time > TIMEOUT) {
       this.current_proposal = null;
     }
 
@@ -25,43 +26,50 @@ class Paxos {
 
     this.current_proposal = {
       start_time: (new Date).getTime(),
-      total: this.comms.peers.length,
+      total: this.comms.members.length - 1,
       promise: [],
       reject: [],
       response_tuples: [{ state: this.state, seq: this.seq }]
     };
 
     this.seq = {
-      time: this.current_proposal['start_time'],
+      time: this.current_proposal.start_time,
       id: this.id
     }; // tuple, for absolute uniqueness
 
     this.comms.sendDataToChannel('PROPOSE', { state: this.state, seq: this.seq });
+    this.log('Sending Proposal', JSON.stringify({ state: this.state, seq: this.seq }));
   }
 
-  receiveEvent(event) {
-    var id = event.data['id'];
-    var data = event.data;
-    console.log('Receiving event from ' + id);
+  receiveEvent() {
+    var paxos = this;
+    return function(event) {
+      if (event.targetId != null && event.targetId != paxos.id) {
+        return;
+      }
+      var id = event.id;
+      var data = event.data;
+      paxos.log('Receiving event (' + event.type + ')', 'from ' + id);
 
-    switch (data['type']) {
-    case 'PROPOSE':
-      this.receiveProposal(id, data['data']);
-      break;
-    case 'RESPONSE':
-      this.receiveResponse(id, data['data']);
-      break;
-    case 'COMMIT':
-      this.receiveCommit(id, data['data']);
-      break;
-    default:
-      console.error('Received an unknown event (' + data['type'] + ') from peer ' + id);
-      break;
-    }
+      switch (event.type) {
+      case 'PROPOSE':
+        paxos.receiveProposal(id, data);
+        break;
+      case 'RESPONSE':
+        paxos.receiveResponse(id, data);
+        break;
+      case 'COMMIT':
+        paxos.receiveCommit(id, data);
+        break;
+      default:
+        console.error('Received an unknown event (' + event.type + ') from peer ' + id);
+        break;
+      }
+    };
   }
 
   receiveProposal(id, proposal) {
-    if (proposal.seq > this.seq) {
+    if (this.seq == null || proposal.seq.time > this.seq.time) {
       this.comms.sendDataToPeer(id, 'RESPONSE', { accept: true, state: this.state, seq: proposal.seq }); // undefined state & seq if it hasn't accepted anything yet
       this.accepted_seq = proposal.seq;
     } else {
@@ -87,7 +95,7 @@ class Paxos {
     var rejectionCount = this.current_proposal.reject.length;
 
     if (promiseCount / this.current_proposal.total > 0.5) {
-      this._commit()
+      this._commit();
     } else if (promiseCount + rejectionCount == this.current_proposal.total) {
       // We've received all responses, but they did not reach majority, reset proposal
       this.current_proposal = null;
@@ -95,18 +103,31 @@ class Paxos {
   }
 
   receiveCommit(id, proposal) {
-    if (proposal.seq > this.seq && proposal.seq >= this.accepted_seq) {
+    if (this.seq == null || proposal.seq.time > this.seq.time && proposal.seq.time >= this.accepted_seq.time) {
       this.state = proposal.state;
       this.seq = proposal.seq;
       this.accepted_seq = null;
+
+      this.log('COMMIT> proposal.state=', this.state);
+      this.log('COMMIT> setting proposal.seq=', JSON.stringify(this.seq));
     }
   }
 
   _commit() {
     // TODO: need to write edge case
-    var times = this.current_proposal.response_tuples.map(function(o){ return o.seq.time; });
+    var times = this.current_proposal.response_tuples.map(function(o){ return o.seq ? o.seq.time : null; });
     var highest_sequence = Math.max.apply(Math, times);
-    this.comms.sendDataToChannel('COMMIT', highest_sequence);
+    var tuples = this.current_proposal.response_tuples.filter(function(o) { 
+      return o.seq != null && o.seq.time == highest_sequence;
+    });
+
+    this.comms.sendDataToChannel('COMMIT', tuples[0]);
+    this.log('COMMITING', JSON.stringify(tuples[0]));
+  }
+
+  log(type, msg) {
+    console.log(type + ': ' + msg);
+    window.appendText(type, msg);
   }
 }
 

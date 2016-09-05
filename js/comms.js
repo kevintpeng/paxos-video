@@ -11,21 +11,26 @@ class Comms {
   }
 
   connect() {
+    /*eslint-disable no-undef */
     this.pusher = new Pusher('a067c1d86efea8a389b5', {
-      authEndpoint: "http://localhost:9000/pusher/auth",
+      authEndpoint: 'http://localhost:9000/pusher/auth',
       auth: { params: { user_id: this.id } },
       wsHost: 'paxos-poxa.herokuapp.com',
       wsPort: 80,
-      enabledTransports: ["ws", "flash"],
-      disabledTransports: ["flash"],
+      enabledTransports: ['ws', 'flash'],
+      disabledTransports: ['flash'],
       disableStats: true
     });
-    this.channel = this.pusher.subscribe("presence-" + this.room);
+    /*eslint-enable no-undef */
+    this.channel = this.pusher.subscribe('presence-' + this.room);
     this.setupChannelBindings();
     this.pusher.bind('client-data', function(data) {
       console.log(data.data);
-      window.appendText(data)
     });
+  }
+
+  setHandleReceivedData(fnc) {
+    this.pusher.bind('client-data', fnc);
   }
 
   setupChannelBindings() {
@@ -34,7 +39,7 @@ class Comms {
       members.each(function(member) {
         comms.members.push(member);
       });
-    })
+    });
     this.channel.bind('pusher:member_added', function(member) {
       comms.members.push(member);
     });
@@ -53,7 +58,17 @@ class Comms {
     };
 
     this.channel.trigger('client-data', message);
-    window.appendText(message);
+  }
+
+  sendDataToPeer(id, type, data) {
+    var message = {
+      'id': this.id,
+      'type': type,
+      'data': data,
+      'targetId': id
+    };
+
+    this.channel.trigger('client-data', message);
   }
 }
 
